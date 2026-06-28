@@ -99,7 +99,7 @@ a.tab.on:hover{color:#fff}
 
 /* ===== 낙폭 게이지 (0 오른쪽 ~ -20 왼쪽) ===== */
 .gauge-card{padding:18px}
-.gauge-wrap{position:relative;padding-top:54px}
+.gauge-wrap{position:relative;padding-top:34px}
 .gauge-track{position:relative;display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
 .seg{height:100%}
 /* 0~-20 매핑: 각 5%p = 25% 폭. 왼→오: 경계(≤-15) 조정 관심 정상 */
@@ -108,7 +108,7 @@ a.tab.on:hover{color:#fff}
 .seg.watch{flex:0 0 25%;background:var(--watch)}
 .seg.normal{flex:0 0 25%;background:var(--normal)}
 .marker{position:absolute;top:0;transform:translateX(-50%);transition:left .5s ease;pointer-events:none;z-index:3}
-.marker.low{top:26px}
+.marker.low{top:0}
 .marker .mlabel{position:relative;display:block;font-size:11.5px;font-weight:700;background:var(--txt);color:var(--bg);
   padding:3px 8px;border-radius:7px;white-space:nowrap;box-shadow:0 3px 9px #0008}
 .marker .mlabel b{font-weight:800}
