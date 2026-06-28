@@ -1,0 +1,12 @@
+# Netlify 설정 — 정적 사이트(docs/)를 루트로 서빙. 빌드 단계 없음.
+# 깃 푸시(스케줄 데이터 커밋 포함)마다 자동 재배포 → 자동 업데이트 유지.
+[build]
+  publish = "docs"
+  command = ""
+
+# 데이터 JSON은 CORS 허용 — 이격도 페이지가 본 페이지의 latest.json을 읽어
+# 두 사이트가 같은 숫자를 말하도록(상호 동반 카드).
+[[headers]]
+  for = "/data/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"

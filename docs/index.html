@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>코스피·코스닥 MDD · 이그전 트래커</title>
+<meta name="description" content="이그전(이은택의 그림전략) MDD(최대 낙폭) 이론 기반 코스피·코스닥 고점대비 낙폭 실시간 트래킹. 50일 이격도와 함께 조정 구간 판단. 매일 장중·종가 갱신." />
+<meta property="og:title" content="코스피·코스닥 MDD · 이그전 트래커" />
+<meta property="og:description" content="고점 대비 최대 낙폭(MDD) 실시간 트래킹 — 지금의 하락이 강세장 정상 조정인지 판단 (이격도 동시 활용)" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" href="./styles.css?v=20260626-5" />
+
+<script src="./config.js"></script>
+<script>
+(function () {
+  var cfg = window.SITE_CONFIG || {};
+  var id = cfg.gaMeasurementId;
+  if (!id) return;
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(id);
+  document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { window.dataLayer.push(arguments); };
+  window.gtag("js", new Date());
+  window.gtag("config", id, { anonymize_ip: true });
+})();
+</script>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand">
+      <span class="logo">📉</span>
+      <div>
+        <h1>코스피·코스닥 MDD</h1>
+        <p class="sub">이그전 기반 고점대비 낙폭 트래커</p>
+      </div>
+    </div>
+    <div class="top-right">
+      <nav class="tabs" aria-label="지표 전환">
+        <span class="tab on" aria-current="page">MDD</span>
+        <a class="tab" id="dispTab" href="#" rel="noopener">50일 이격도 ↗</a>
+      </nav>
+      <a class="tg" id="tgLink" href="#" target="_blank" rel="noopener" hidden aria-label="텔레그램 채널 열기">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
+        <span class="tg-text">채널</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- Lv3: 통합 신호 배너 (MDD + 이격도) -->
+  <section class="card signal-card" id="signalCard">
+    <div class="signal-head">
+      <h2>통합 신호 <span class="hint">MDD × 이격도</span></h2>
+      <span class="ts" id="updatedAt">불러오는 중…</span>
+    </div>
+    <div class="signal-rows" id="signalRows"></div>
+    <p class="signal-note">※ 매수/매도 권유가 아니라 현재 구간을 설명하는 참고 지표입니다. 투자 판단의 책임은 본인에게 있습니다.</p>
+  </section>
+
+  <!-- Lv2: 지수별 현황 카드 (MDD + 이격도 나란히) -->
+  <section class="dual" id="dualCards"></section>
+
+  <!-- 낙폭 게이지 (각 지수 자기 구간 기준) -->
+  <section class="card gauge-card">
+    <div class="card-head"><h2>현재 낙폭 위치 <span class="hint">각 지수 자기 구간 기준</span></h2></div>
+    <div class="gauge-wrap">
+      <div class="gauge-track">
+        <div class="seg breach"></div>
+        <div class="seg correction"></div>
+        <div class="seg watch"></div>
+        <div class="seg normal"></div>
+      </div>
+      <div class="marker" id="mkKospi" hidden><span class="mlabel">코스피 <b id="mkKospiV"></b></span></div>
+      <div class="marker low" id="mkKosdaq" hidden><span class="mlabel">코스닥 <b id="mkKosdaqV"></b></span></div>
+      <div class="gauge-ticks zone">
+        <span class="zt" style="left:12.5%">경계</span>
+        <span class="zt" style="left:37.5%">조정</span>
+        <span class="zt" style="left:62.5%">관심</span>
+        <span class="zt" style="left:87.5%">정상</span>
+      </div>
+    </div>
+    <div class="gauge-legend">
+      <span class="lg breach"><i></i>경계</span>
+      <span class="lg correction"><i></i>조정</span>
+      <span class="lg watch"><i></i>관심</span>
+      <span class="lg normal"><i></i>정상</span>
+    </div>
+  </section>
+
+  <!-- 차트: 낙폭 추이 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>고점대비 낙폭(MDD) 추이</h2>
+      <div class="range-btns" id="rangeBtns">
+        <button data-r="60">3M</button>
+        <button data-r="120">6M</button>
+        <button data-r="250" class="on">1Y</button>
+        <button data-r="500">2Y</button>
+        <button data-r="1250">5Y</button>
+      </div>
+    </div>
+    <div class="series-row">
+      <div class="series-toggles" id="seriesToggles" role="group" aria-label="지수 선택">
+        <button class="series-toggle on" data-key="kospi"><i class="sw kospi"></i>코스피</button>
+        <button class="series-toggle on" data-key="kosdaq"><i class="sw kosdaq"></i>코스닥</button>
+      </div>
+      <span class="legend-hint">🟠 -10 조정 · 🔴 -15 경계</span>
+    </div>
+    <div class="chart-box"><canvas id="ddChart"></canvas></div>
+    <p class="chart-hint">🔍 핀치·휠로 확대 · 드래그로 이동 · 더블탭으로 초기화</p>
+  </section>
+
+  <!-- 이그전 이론 설명 -->
+  <section class="card theory">
+    <h2>이그전 MDD 해석법</h2>
+    <p><b>MDD = (현재가 ÷ 직전 고점 − 1) × 100.</b> 고점 대비 지금 얼마나 빠졌는지를 나타냅니다. 본 트래커는 <b>52주(최근 1년) 고점 대비 낙폭</b>으로 구간을 판정하고, 사상 최고가 대비 낙폭도 함께 보여줍니다.</p>
+    <p class="muted-p">핵심: <b>강세장일수록 조정(MDD)은 더 자주·더 크게</b> 나타납니다. 2010년 이후 횡보장에선 −10% 조정이 1.5년에 1번꼴이었지만, 강세장에선 3~4개월에 1번꼴로 잦아졌습니다. 그래서 −10%대 조정은 강세장에선 '비정상'이 아니라 '정상'에 가깝습니다.</p>
+    <ul class="theory-list two">
+      <li><span class="tag normal">정상</span> <b class="lv">코스피 0~-5 · 코스닥 0~-9</b> 통상 범위</li>
+      <li><span class="tag watch">관심</span> <b class="lv">코스피 -5~-10 · 코스닥 -9~-14</b> 조정 진입 가능</li>
+      <li><span class="tag correction">조정</span> <b class="lv">코스피 -10~-15 · 코스닥 -14~-20</b> 강세장에선 흔한 정상 조정. 패닉셀 자제</li>
+      <li><span class="tag breach">경계</span> <b class="lv">코스피 ≤-15 · 코스닥 ≤-20</b> 역사적으로 경기둔화기에만 출현</li>
+    </ul>
+    <p class="muted">※ 지수별 변동성 차이로 코스피·코스닥 기준선이 다릅니다(각 지수 자체 분포 기준).</p>
+    <p><b>이격도와 함께 보기:</b> MDD가 조정 구간으로 깊어졌고 <a id="dispLink2" href="#" rel="noopener">50일 이격도</a>도 과열이 해소됐다면 강세장 정상 조정의 분할매수 후보 구간입니다. 반대로 낙폭은 얕은데 이격도가 과열이면 추격매수를 자제할 구간입니다.</p>
+    <p class="muted">※ 출처: <a href="https://m.blog.naver.com/egzion/224322732361" target="_blank" rel="noopener">이그전(이은택의 그림전략)</a>. 본 사이트는 정보 제공용이며 투자 권유가 아닙니다.</p>
+  </section>
+
+  <!-- 히스토리 테이블 -->
+  <section class="card">
+    <div class="card-head"><h2>최근 기록 <span class="hint">52주 고점대비 낙폭</span></h2></div>
+    <div class="table-box">
+      <table id="histTable">
+        <thead><tr><th>날짜</th><th>코스피</th><th>구간</th><th>코스닥</th><th>구간</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot wrap">
+  <p>데이터: 무료 공개 소스(KRX/pykrx · Naver/Yahoo) · 갱신: 매 거래일 12:00 / 15:40 KST</p>
+  <p class="muted">© CHO투자노트 · 이그전 이론 기반 · 투자 판단의 책임은 본인에게 있습니다.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+<script src="./app.js?v=20260626-4" defer></script>
+</body>
+</html>

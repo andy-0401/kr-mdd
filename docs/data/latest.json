@@ -1,0 +1,69 @@
+{
+  "date": "2026-06-26",
+  "time": "15:40",
+  "type": "close",
+  "note": "장 마감 종가 기준 확정값입니다.",
+  "updated_at": "2026-06-26T15:40:00+09:00",
+  "indices": {
+    "kospi": {
+      "key": "kospi",
+      "name": "코스피",
+      "price": 8411.21,
+      "change": -519.09,
+      "change_pct": -5.81,
+      "high_52w": 9114.55,
+      "dd52": -7.72,
+      "ath": 9114.55,
+      "dd_ath": -7.72,
+      "zone": "watch",
+      "zone_label": "관심 (조정 진입 가능)",
+      "ma50": 7653.29,
+      "disparity": 109.9,
+      "prev_disparity": 117.48,
+      "disp_zone": "normal"
+    },
+    "kosdaq": {
+      "key": "kosdaq",
+      "name": "코스닥",
+      "price": 851.37,
+      "change": -36.44,
+      "change_pct": -4.1,
+      "high_52w": 1226.18,
+      "dd52": -30.57,
+      "ath": 1226.18,
+      "dd_ath": -30.57,
+      "zone": "breach",
+      "zone_label": "경계 (경기둔화 가능성)",
+      "ma50": 1092.78,
+      "disparity": 77.91,
+      "prev_disparity": 80.88,
+      "disp_zone": "cooldown"
+    }
+  },
+  "thresholds": {
+    "kospi": {
+      "disp": {
+        "overheat": 130.0,
+        "caution": 120.0,
+        "cooldown": 105.0
+      },
+      "mdd": {
+        "watch": -5.0,
+        "correction": -10.0,
+        "breach": -15.0
+      }
+    },
+    "kosdaq": {
+      "disp": {
+        "overheat": 124.0,
+        "caution": 118.0,
+        "cooldown": 106.0
+      },
+      "mdd": {
+        "watch": -9.0,
+        "correction": -14.0,
+        "breach": -20.0
+      }
+    }
+  }
+}
