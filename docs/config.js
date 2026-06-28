@@ -11,5 +11,5 @@
 window.SITE_CONFIG = {
   disparityUrl: "https://kospi-ma.netlify.app/",
   telegramUrl: "https://t.me/andyc14note",
-  gaMeasurementId: "",
+  gaMeasurementId: "G-B8M3849G0G",
 };
