@@ -2,23 +2,15 @@ name: 코스피·코스닥 MDD 갱신
 
 on:
   schedule:
-    # GitHub Actions cron 은 UTC 기준. KST = UTC+9.
-    # 무료 티어 cron 은 정시 보장이 안 되고 정각(:00)이 가장 혼잡 → 정각 회피 + 다중 시도.
-    # 파이프라인이 멱등(무변경=빈커밋 차단)이라 중복 실행 안전.
-    - cron: "7 3 * * 1-5"    # 12:07 KST — 장중 1차
-    - cron: "20 3 * * 1-5"   # 12:20 KST — 장중 백업
+    # MDD는 종가 1회만 갱신. GitHub Actions cron 은 UTC 기준(KST=UTC+9).
+    # 무료 티어 cron 은 정시 보장이 안 돼 종가 후 여러 번 시도(멱등: 무변경=빈커밋 차단).
     - cron: "42 6 * * 1-5"   # 15:42 KST — 종가 1차
     - cron: "57 6 * * 1-5"   # 15:57 KST — 종가 백업
     - cron: "12 7 * * 1-5"   # 16:12 KST — 종가 백업2
   repository_dispatch:
-    types: [intraday, close]
+    types: [close]
   workflow_dispatch:
     inputs:
-      type:
-        description: "갱신 유형"
-        type: choice
-        default: close
-        options: [close, intraday]
       force:
         description: "비거래일에도 강제 실행"
         type: boolean
@@ -47,26 +39,16 @@ jobs:
       - name: Install deps
         run: pip install -r scripts/requirements.txt
 
-      - name: Determine run type
+      - name: Determine force
         id: cfg
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TYPE="${{ inputs.type }}"
-            FORCE="${{ inputs.force }}"
-          elif [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            TYPE="${{ github.event.action }}"; FORCE="false"
-          else
-            H=$(echo "${{ github.event.schedule }}" | awk '{print $2}')
-            if [ "$H" -ge 6 ]; then TYPE="close"; else TYPE="intraday"; fi
-            FORCE="false"
-          fi
-          echo "type=$TYPE" >> "$GITHUB_OUTPUT"
+          FORCE="false"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then FORCE="${{ inputs.force }}"; fi
           echo "force=$FORCE" >> "$GITHUB_OUTPUT"
-          echo "선택된 유형: $TYPE (force=$FORCE)"
 
-      - name: Run update
+      - name: Run update (종가 1회)
         run: |
-          ARGS="--type ${{ steps.cfg.outputs.type }}"
+          ARGS="--type close"
           if [ "${{ steps.cfg.outputs.force }}" = "true" ]; then ARGS="$ARGS --force"; fi
           python scripts/run_update.py $ARGS
 
@@ -78,7 +60,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "변경 없음 — 커밋 생략"
           else
-            git commit -m "data: ${{ steps.cfg.outputs.type }} MDD 갱신 ($(date -u +%Y-%m-%dT%H:%MZ))"
+            git commit -m "data: MDD 종가 갱신 ($(date -u +%Y-%m-%dT%H:%MZ))"
             for i in 1 2 3 4; do
               git push origin HEAD:${{ github.ref_name }} && break
               echo "push 재시도 $i..."; sleep $((2**i))
