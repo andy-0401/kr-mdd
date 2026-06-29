@@ -56,6 +56,7 @@
     if (latest.thresholds && latest.thresholds.kospi) THRESH = latest.thresholds;
 
     $("updatedAt").textContent = `${latest.date} ${latest.type === "close" ? "15:40" : "12:00"} 기준`;
+    checkStale(latest.date);
     renderDualCards(latest);
     renderGauge(latest);
 
@@ -64,6 +65,24 @@
       buildDdChart(250);
       renderTable();
       wireRangeButtons("rangeBtns", (n) => buildDdChart(n));
+    }
+  }
+
+  // 데이터 갱신 지연 감지: 마지막 데이터일이 4일(주말 여유 포함) 넘게 지났으면 경고 표시.
+  function checkStale(dateStr) {
+    if (!dateStr) return;
+    const last = new Date(dateStr + "T00:00:00+09:00");
+    const now = new Date();
+    const days = Math.floor((now - last) / 86400000);
+    if (days >= 4) {
+      const row = document.querySelector(".updated-row");
+      if (row && !document.getElementById("staleWarn")) {
+        const s = document.createElement("span");
+        s.id = "staleWarn";
+        s.className = "stale-warn";
+        s.textContent = `⚠ 갱신 지연 — ${days}일 전 데이터`;
+        row.appendChild(s);
+      }
     }
   }
 
