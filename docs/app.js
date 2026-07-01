@@ -44,6 +44,7 @@
   async function load() {
     wireTabs();
     wireTelegram();
+    wireShare();
     wireSeriesToggles();
     // 본 페이지(MDD)가 코스피·코스닥 MDD+이격도의 단일 소스(canonical).
     const [hist, latest] = await Promise.all([
@@ -66,6 +67,31 @@
       renderTable();
       wireRangeButtons("rangeBtns", (n) => buildDdChart(n));
     }
+  }
+
+  // 공유 버튼: 정식(netlify) 주소를 공유 추적 태그와 함께 — 모바일은 네이티브 공유(카톡·텔레그램), 데스크톱은 복사.
+  function wireShare() {
+    const btn = $("shareBtn");
+    if (!btn) return;
+    const base = CFG.shareUrl || location.href;
+    const url = base + (base.includes("?") ? "&" : "?") + "utm_source=share&utm_medium=button";
+    btn.addEventListener("click", async () => {
+      track("share_click", {});
+      if (navigator.share) {
+        try { await navigator.share({ title: document.title, url }); return; } catch (e) { /* 취소 등 */ }
+      }
+      try { await navigator.clipboard.writeText(url); toast("링크가 복사됐어요 — 붙여넣기 하세요"); }
+      catch (e) { toast(url); }
+    });
+  }
+
+  function toast(msg) {
+    let t = $("toast");
+    if (!t) { t = document.createElement("div"); t.id = "toast"; t.className = "toast"; document.body.appendChild(t); }
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove("show"), 2400);
   }
 
   // 데이터 갱신 지연 감지: 마지막 데이터일이 4일(주말 여유 포함) 넘게 지났으면 경고 표시.

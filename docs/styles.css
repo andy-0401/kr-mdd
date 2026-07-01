@@ -40,6 +40,17 @@ a.tab.on:hover{color:#fff}
 .tg:hover{background:#1b8ec4;color:#fff}
 .tg:active{transform:scale(.97)}
 .tg svg{flex:0 0 auto;display:block;width:16px;height:16px}
+/* 공유 버튼 + 토스트 */
+.share-btn{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;white-space:nowrap;cursor:pointer;
+  font-size:13px;font-weight:700;color:var(--txt);background:#0f1521;border:1px solid var(--line);
+  padding:7px 12px;border-radius:999px;transition:background .15s,transform .15s}
+.share-btn:hover{background:#161d2b}
+.share-btn:active{transform:scale(.97)}
+.share-btn svg{flex:0 0 auto;display:block}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(10px);
+  background:var(--txt);color:var(--bg);font-size:13px;font-weight:700;padding:10px 16px;border-radius:999px;
+  box-shadow:0 6px 20px #0007;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50;max-width:88vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* Cards */
 .card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:16px;padding:18px;margin:16px 0;box-shadow:0 6px 24px #00000033}
@@ -217,6 +228,8 @@ th{color:var(--muted);font-weight:600;font-size:12px}
 @media(max-width:480px){
   .tg .tg-text{display:none}
   .tg{padding:7px 9px}
+  .share-btn .share-text{display:none}
+  .share-btn{padding:7px 9px}
 }
 @media(max-width:380px){
   .brand .sub{display:none}

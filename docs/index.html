@@ -8,7 +8,7 @@
 <meta property="og:title" content="코스피·코스닥 MDD · 이그전 트래커" />
 <meta property="og:description" content="고점 대비 최대 낙폭(MDD) 실시간 트래킹 — 지금의 하락이 강세장 정상 조정인지 판단 (이격도 동시 활용)" />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-<link rel="stylesheet" href="./styles.css?v=20260626-8" />
+<link rel="stylesheet" href="./styles.css?v=20260630-9" />
 
 <script src="./config.js"></script>
 <script>
@@ -42,6 +42,10 @@
         <span class="tab on" aria-current="page">MDD</span>
         <a class="tab" id="dispTab" href="#" rel="noopener">50일 이격도 ↗</a>
       </nav>
+      <button class="share-btn" id="shareBtn" type="button" aria-label="공유 링크 복사/공유">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>
+        <span class="share-text">공유</span>
+      </button>
       <a class="tg" id="tgLink" href="#" target="_blank" rel="noopener" hidden aria-label="텔레그램 채널 열기">
         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
         <span class="tg-text">채널</span>
@@ -145,6 +149,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
-<script src="./app.js?v=20260626-7" defer></script>
+<script src="./app.js?v=20260630-9" defer></script>
 </body>
 </html>
