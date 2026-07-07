@@ -75,13 +75,16 @@
     if (!btn) return;
     const base = CFG.shareUrl || location.href;
     const url = base + (base.includes("?") ? "&" : "?") + "utm_source=share&utm_medium=button";
+    // 모바일(터치)에서만 네이티브 공유창(카톡·텔레그램). 데스크톱은 링크 복사.
+    const isTouch = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
     btn.addEventListener("click", async () => {
       track("share_click", {});
-      if (navigator.share) {
-        try { await navigator.share({ title: document.title, url }); return; } catch (e) { /* 취소 등 */ }
+      if (isTouch && navigator.share) {
+        try { await navigator.share({ title: document.title, url }); } catch (e) { /* 취소/실패 → 조용히 무시 */ }
+        return;
       }
       try { await navigator.clipboard.writeText(url); toast("링크가 복사됐어요 — 붙여넣기 하세요"); }
-      catch (e) { toast(url); }
+      catch (e) { toast("복사가 안 됐어요. 다시 눌러주세요"); }
     });
   }
 
