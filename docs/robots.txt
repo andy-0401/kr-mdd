@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /share/
+
+Sitemap: https://andy-0401.github.io/kr-mdd/sitemap.xml

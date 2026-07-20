@@ -5,8 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>코스피·코스닥 MDD · 이그전 트래커</title>
 <meta name="description" content="이그전(이은택의 그림전략) MDD(최대 낙폭) 이론 기반 코스피·코스닥 고점대비 낙폭 실시간 트래킹. 50일 이격도와 함께 조정 구간 판단. 매일 장중·종가 갱신." />
+<link rel="canonical" href="https://andy-0401.github.io/kr-mdd/" />
+<meta name="author" content="CHO투자노트" />
+<meta name="keywords" content="코스피 MDD, 코스닥 MDD, 최대 낙폭, 고점 대비 낙폭, MDD 계산법, 강세장 조정, 이그전, 이은택 그림전략" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="이그전 트래커" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://andy-0401.github.io/kr-mdd/" />
 <meta property="og:title" content="코스피·코스닥 MDD · 이그전 트래커" />
 <meta property="og:description" content="고점 대비 최대 낙폭(MDD) 실시간 트래킹 — 지금의 하락이 강세장 정상 조정인지 판단 (이격도 동시 활용)" />
+<meta property="og:image" content="https://andy-0401.github.io/kr-mdd/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="코스피·코스닥 MDD 이그전 트래커" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="코스피·코스닥 MDD · 이그전 트래커" />
+<meta name="twitter:description" content="고점 대비 최대 낙폭(MDD) 실시간 트래킹 — 지금의 하락이 강세장 정상 조정인지 판단" />
+<meta name="twitter:image" content="https://andy-0401.github.io/kr-mdd/og.png" />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" href="./styles.css?v=20260630-10" />
 
@@ -25,6 +40,47 @@
   window.gtag("js", new Date());
   window.gtag("config", id, { anonymize_ip: true });
 })();
+</script>
+
+<!-- 구조화 데이터: 검색엔진용 (앱 정보 + FAQ 리치결과) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "코스피·코스닥 MDD · 이그전 트래커",
+      "url": "https://andy-0401.github.io/kr-mdd/",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "inLanguage": "ko-KR",
+      "isAccessibleForFree": true,
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" },
+      "description": "이그전(이은택의 그림전략) MDD(최대 낙폭) 이론 기반 코스피·코스닥 고점 대비 낙폭 실시간 트래킹. 50일 이격도와 함께 조정 구간 판단. 매 거래일 자동 갱신.",
+      "author": { "@type": "Person", "name": "CHO투자노트" }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "MDD(최대 낙폭)란 무엇인가요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "MDD = (현재가 ÷ 직전 고점 − 1) × 100. 고점 대비 지금 얼마나 하락했는지를 나타냅니다. 본 트래커는 52주(최근 1년) 고점 대비 낙폭으로 구간을 판정하고, 사상 최고가 대비 낙폭도 함께 보여줍니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "지금의 하락이 강세장 정상 조정인지 어떻게 판단하나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "강세장일수록 조정(MDD)은 더 자주·더 크게 나타납니다. 코스피 -10~-15%(코스닥 -14~-20%)대 낙폭은 강세장에선 흔한 정상 조정에 가까우며, 50일 이격도 과열이 함께 해소됐다면 분할매수 후보 구간으로 봅니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "코스피와 코스닥의 MDD 기준선이 다른 이유는?",
+          "acceptedAnswer": { "@type": "Answer", "text": "지수별 변동성 차이 때문입니다. 각 지수 자체의 낙폭 분포를 기준으로 정상·관심·조정·경계 구간을 별도로 산정합니다." }
+        }
+      ]
+    }
+  ]
+}
 </script>
 </head>
 <body>
