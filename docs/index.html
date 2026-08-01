@@ -64,18 +64,28 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "MDD(최대 낙폭)란 무엇인가요?",
-          "acceptedAnswer": { "@type": "Answer", "text": "MDD = (현재가 ÷ 직전 고점 − 1) × 100. 고점 대비 지금 얼마나 하락했는지를 나타냅니다. 본 트래커는 52주(최근 1년) 고점 대비 낙폭으로 구간을 판정하고, 사상 최고가 대비 낙폭도 함께 보여줍니다." }
+          "name": "코스피 MDD가 -10%면 위험한가요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "강세장에서는 코스피 -10~-15% 낙폭이 오히려 흔한 정상 조정입니다. 2010년 이후 강세장에선 -10%대 조정이 3~4개월에 한 번꼴로 나타났습니다. 낙폭만으로 위험을 단정하기보다 50일 이격도 과열이 함께 해소됐는지를 같이 보는 것이 좋습니다." }
         },
         {
           "@type": "Question",
-          "name": "지금의 하락이 강세장 정상 조정인지 어떻게 판단하나요?",
-          "acceptedAnswer": { "@type": "Answer", "text": "강세장일수록 조정(MDD)은 더 자주·더 크게 나타납니다. 코스피 -10~-15%(코스닥 -14~-20%)대 낙폭은 강세장에선 흔한 정상 조정에 가까우며, 50일 이격도 과열이 함께 해소됐다면 분할매수 후보 구간으로 봅니다." }
+          "name": "MDD는 52주 고점 기준인가요, 사상 최고가 기준인가요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "본 트래커는 52주(최근 1년) 고점 대비 낙폭으로 정상·관심·조정·경계 구간을 판정하며, 사상 최고가 대비 낙폭도 함께 표시합니다." }
         },
         {
           "@type": "Question",
-          "name": "코스피와 코스닥의 MDD 기준선이 다른 이유는?",
-          "acceptedAnswer": { "@type": "Answer", "text": "지수별 변동성 차이 때문입니다. 각 지수 자체의 낙폭 분포를 기준으로 정상·관심·조정·경계 구간을 별도로 산정합니다." }
+          "name": "코스닥 MDD 기준선이 코스피보다 깊은 이유는?",
+          "acceptedAnswer": { "@type": "Answer", "text": "코스닥은 변동성이 커서 같은 정상 조정이라도 낙폭이 더 깊습니다. 그래서 각 지수 자체 분포를 기준으로 조정 구간선을 코스피 -10~-15%, 코스닥 -14~-20%로 다르게 둡니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "MDD로 매수 타이밍을 어떻게 잡나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "MDD가 조정 구간으로 깊어지고 50일 이격도 과열도 해소됐다면 강세장 정상 조정의 분할매수 후보 구간으로 봅니다. 반대로 낙폭이 얕은데 이격도가 과열이면 추격매수를 자제합니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "지금 코스피·코스닥 MDD는 얼마인가요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "이 페이지 상단 카드에서 코스피·코스닥의 현재 고점 대비 낙폭(MDD)을 매 거래일 장중·종가 기준으로 실시간 확인할 수 있습니다." }
         }
       ]
     }
@@ -182,6 +192,40 @@
     <p class="muted">※ 지수별 변동성 차이로 코스피·코스닥 기준선이 다릅니다(각 지수 자체 분포 기준).</p>
     <p><b>이격도와 함께 보기:</b> MDD가 조정 구간으로 깊어졌고 <a id="dispLink2" href="#" rel="noopener">50일 이격도</a>도 과열이 해소됐다면 강세장 정상 조정의 분할매수 후보 구간입니다. 반대로 낙폭은 얕은데 이격도가 과열이면 추격매수를 자제할 구간입니다.</p>
     <p class="muted">※ 출처: <a href="https://m.blog.naver.com/egzion/224322732361" target="_blank" rel="noopener">이그전(이은택의 그림전략)</a>. 본 사이트는 정보 제공용이며 투자 권유가 아닙니다.</p>
+  </section>
+
+  <!-- 자주 묻는 질문 (롱테일 검색어 · AI 인용용) -->
+  <section class="card faq">
+    <h2>코스피·코스닥 MDD 자주 묻는 질문</h2>
+    <style>
+      .faq details{border:1px solid var(--line);border-radius:12px;background:var(--card2);margin:10px 0;overflow:hidden}
+      .faq summary{cursor:pointer;padding:14px 16px;font-size:14.5px;font-weight:700;color:var(--txt);list-style:none;position:relative;padding-right:40px}
+      .faq summary::-webkit-details-marker{display:none}
+      .faq summary::after{content:"+";position:absolute;right:16px;top:13px;color:var(--muted);font-weight:700;font-size:18px}
+      .faq details[open] summary::after{content:"\2013"}
+      .faq .a{padding:2px 16px 15px;font-size:13.5px;color:var(--muted);line-height:1.65}
+      .faq .a a{color:var(--accent)}
+    </style>
+    <details>
+      <summary>코스피 MDD가 -10%면 위험한가요?</summary>
+      <div class="a">강세장에서는 코스피 -10~-15% 낙폭이 오히려 흔한 정상 조정입니다. 2010년 이후 강세장에선 -10%대 조정이 3~4개월에 한 번꼴로 나타났습니다. 낙폭만으로 위험을 단정하기보다, 50일 이격도 과열이 함께 해소됐는지를 같이 보는 것이 좋습니다.</div>
+    </details>
+    <details>
+      <summary>MDD는 52주 고점 기준인가요, 사상 최고가 기준인가요?</summary>
+      <div class="a">본 트래커는 <b>52주(최근 1년) 고점 대비 낙폭</b>으로 정상·관심·조정·경계 구간을 판정하며, 사상 최고가 대비 낙폭도 함께 표시합니다.</div>
+    </details>
+    <details>
+      <summary>코스닥 MDD 기준선이 코스피보다 깊은 이유는?</summary>
+      <div class="a">코스닥은 변동성이 커서 같은 '정상 조정'이라도 낙폭이 더 깊습니다. 그래서 각 지수 자체 분포를 기준으로 조정 구간선을 코스피 -10~-15%, 코스닥 -14~-20%로 다르게 둡니다.</div>
+    </details>
+    <details>
+      <summary>MDD로 매수 타이밍을 어떻게 잡나요?</summary>
+      <div class="a">MDD가 조정 구간으로 깊어지고 <a id="dispLinkFaq" href="#" rel="noopener">50일 이격도</a> 과열도 해소됐다면 강세장 정상 조정의 분할매수 후보 구간으로 봅니다. 반대로 낙폭이 얕은데 이격도가 과열이면 추격매수를 자제합니다.</div>
+    </details>
+    <details>
+      <summary>지금 코스피·코스닥 MDD는 얼마인가요?</summary>
+      <div class="a">이 페이지 상단 카드에서 코스피·코스닥의 현재 고점 대비 낙폭(MDD)을 매 거래일 장중·종가 기준으로 실시간 확인할 수 있습니다.</div>
+    </details>
   </section>
 
   <!-- 히스토리 테이블 -->

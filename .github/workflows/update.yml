@@ -60,6 +60,11 @@ jobs:
           if git diff --staged --quiet; then
             echo "변경 없음 — 커밋 생략"
           else
+            # 데이터가 실제로 갱신된 경우에만 sitemap lastmod 를 오늘(UTC)로 → 검색엔진 신선도 신호
+            if [ -f docs/sitemap.xml ]; then
+              sed -i "s#<lastmod>[0-9-]*</lastmod>#<lastmod>$(date -u +%Y-%m-%d)</lastmod>#g" docs/sitemap.xml
+              git add docs/sitemap.xml
+            fi
             git commit -m "data: MDD 종가 갱신 ($(date -u +%Y-%m-%dT%H:%MZ))"
             for i in 1 2 3 4; do
               git push origin HEAD:${{ github.ref_name }} && break
