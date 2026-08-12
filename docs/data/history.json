@@ -13206,11 +13206,7 @@
 "kospi_close":6345.53,
 "kospi_dd":-30.38,
 "kospi_ma50":7525.43,
-"kospi_disp":84.32,
-"kosdaq_close":857.84,
-"kosdaq_dd":-30.04,
-"kosdaq_ma50":865.34,
-"kosdaq_disp":99.13
+"kospi_disp":84.32
 },
 {
 "date":"2026-08-12",
@@ -13220,7 +13216,7 @@
 "kospi_disp":87.94,
 "kosdaq_close":858.91,
 "kosdaq_dd":-29.95,
-"kosdaq_ma50":861.52,
-"kosdaq_disp":99.7
+"kosdaq_ma50":865.36,
+"kosdaq_disp":99.25
 }
 ]
