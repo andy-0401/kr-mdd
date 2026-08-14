@@ -17,9 +17,9 @@
       "dd_ath": -23.44,
       "zone": "breach",
       "zone_label": "경계 (경기둔화 가능성)",
-      "ma50": 7408.26,
-      "disparity": 94.19,
-      "prev_disparity": 91.56,
+      "ma50": 7530.02,
+      "disparity": 92.67,
+      "prev_disparity": 90.12,
       "disp_zone": "cooldown"
     },
     "kosdaq": {
