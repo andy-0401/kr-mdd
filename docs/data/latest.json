@@ -17,9 +17,9 @@
       "dd_ath": -24.82,
       "zone": "breach",
       "zone_label": "경계 (경기둔화 가능성)",
-      "ma50": 7409.3,
-      "disparity": 92.49,
-      "prev_disparity": 86.92,
+      "ma50": 7337.29,
+      "disparity": 93.39,
+      "prev_disparity": 87.9,
       "disp_zone": "cooldown"
     },
     "kosdaq": {
@@ -34,9 +34,9 @@
       "dd_ath": -31.42,
       "zone": "breach",
       "zone_label": "경계 (경기둔화 가능성)",
-      "ma50": 851.85,
-      "disparity": 98.71,
-      "prev_disparity": 96.63,
+      "ma50": 849.08,
+      "disparity": 99.04,
+      "prev_disparity": 96.94,
       "disp_zone": "cooldown"
     }
   },
