@@ -10,6 +10,11 @@ on:
     - cron: "0 9 * * 1-5"   # 18:00 KST 평일 — 당일 종가 반영 확인
     - cron: "0 1 * * 2-6"   # 10:00 KST — 전일 종가 반영 백업 확인
   workflow_dispatch:
+    inputs:
+      force_fail:
+        description: "알림 도달 테스트 — 일부러 실패시켜 메일이 오는지 확인(실제 이상 아님)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -19,10 +24,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 라이브 데이터 신선도 점검
+        env:
+          FORCE_FAIL: ${{ inputs.force_fail }}
         run: |
           python3 - <<'PY'
-          import json, sys, time, urllib.request
+          import json, os, sys, time, urllib.request
           from datetime import datetime, timezone, timedelta
+
+          FORCE_FAIL = os.environ.get("FORCE_FAIL", "false").lower() == "true"
 
           KST = timezone(timedelta(hours=9))
           today = datetime.now(KST).date()
@@ -60,4 +69,11 @@ jobs:
               sys.exit(1)
 
           print("\n모든 페이지 정상 — 갱신 지연 없음")
+
+          if FORCE_FAIL:
+              print("\n" + "=" * 60)
+              print("::error::[테스트] 알림 도달 확인용 강제 실패입니다. 실제 데이터는 위와 같이 정상입니다.")
+              print("이 메일이 왔다면 = 앞으로 진짜 갱신이 멈췄을 때도 알림을 받습니다.")
+              print("=" * 60)
+              sys.exit(1)
           PY
