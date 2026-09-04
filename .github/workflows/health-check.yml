@@ -1,0 +1,63 @@
+# 라이브 페이지가 실제로 서빙하는 latest.json 의 날짜를 점검한다.
+#   - 레포에 데이터가 커밋돼도 "배포"가 막히면 사용자는 옛 화면을 본다(2026-08 실제 사고).
+#     그래서 레포가 아니라 '사용자가 보는 라이브 URL'을 감시한다.
+#   - 오래됐으면 exit 1 → 워크플로 실패 → GitHub 이 저장소 소유자에게 실패 메일 발송(= 알림).
+#   - 두 레포에 동일 파일을 두어 서로 교차 감시(한쪽 Actions 가 죽어도 다른 쪽이 알림).
+name: 데이터 갱신 감시(실패 시 알림)
+
+on:
+  schedule:
+    - cron: "0 9 * * 1-5"   # 18:00 KST 평일 — 당일 종가 반영 확인
+    - cron: "0 1 * * 2-6"   # 10:00 KST — 전일 종가 반영 백업 확인
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 라이브 데이터 신선도 점검
+        run: |
+          python3 - <<'PY'
+          import json, sys, time, urllib.request
+          from datetime import datetime, timezone, timedelta
+
+          KST = timezone(timedelta(hours=9))
+          today = datetime.now(KST).date()
+          MAX_AGE_DAYS = 4  # 주말·휴장 감안(금요일 종가를 화요일에 봐도 정상)
+
+          TARGETS = {
+              "50일 이격도": "https://andy-0401.github.io/kospi-ma-disparity/data/latest.json",
+              "MDD":        "https://andy-0401.github.io/kr-mdd/data/latest.json",
+          }
+
+          problems = []
+          for name, url in TARGETS.items():
+              try:
+                  req = urllib.request.Request(
+                      f"{url}?cb={int(time.time())}",
+                      headers={"Cache-Control": "no-cache"},
+                  )
+                  with urllib.request.urlopen(req, timeout=20) as r:
+                      data = json.load(r)
+                  last = datetime.strptime(data["date"], "%Y-%m-%d").date()
+                  age = (today - last).days
+                  mark = "OK" if age <= MAX_AGE_DAYS else "STALE"
+                  print(f"[{mark}] {name}: {data['date']} ({age}일 전)")
+                  if age > MAX_AGE_DAYS:
+                      problems.append(f"{name} = {data['date']} ({age}일 전)")
+              except Exception as e:  # 네트워크/파싱/404 등 전부 이상 신호
+                  print(f"[ERROR] {name}: {e}")
+                  problems.append(f"{name} 조회 실패({e})")
+
+          if problems:
+              msg = "데이터 갱신이 멈췄습니다 → " + " | ".join(problems)
+              print(f"::error::{msg}")
+              print("\n확인 순서: ①레포 docs/data/latest.json 날짜 ②갱신 워크플로 성공 여부 "
+                    "③GitHub Pages 배포(Settings→Pages, build_type) ④라이브 URL")
+              sys.exit(1)
+
+          print("\n모든 페이지 정상 — 갱신 지연 없음")
+          PY
