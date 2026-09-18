@@ -67,6 +67,23 @@ def main() -> int:
     print(f"[update] history.json 저장: {len(records)} rows")
 
     snap = M.build_snapshot(histories, run_type=args.type)
+
+    # 지연된 장중 실행이 '이미 확정된 종가 스냅샷'을 덮어쓰지 못하게 막는다.
+    #   GitHub 무료 cron 은 이 계정에서 몇 시간씩 밀려, 12:00 장중 크론이 17시경에
+    #   실행되는 일이 잦다(2026-09-18 실측: 17:10·17:21 KST). 그대로 쓰면 15:40 종가
+    #   스냅샷이 'intraday 12:00' 으로 덮여, 값은 같은데 페이지 표기만 장중으로 어긋난다.
+    #   같은 날짜에 close 가 이미 있으면 장중 스냅샷은 무시한다(--force 로는 덮어쓸 수 있음).
+    #   ※ history.json(일자별 종가)은 유형과 무관하므로 위에서 이미 갱신했다.
+    if args.type == "intraday" and not args.force and LATEST_PATH.exists():
+        try:
+            cur = json.loads(LATEST_PATH.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            cur = {}
+        if cur.get("type") == "close" and cur.get("date") == snap.date:
+            print(f"[update] {snap.date} 종가 스냅샷이 이미 있음 — 장중 갱신 생략"
+                  " (지연 실행이 종가를 덮어쓰는 것 방지)")
+            return 0
+
     LATEST_PATH.write_text(
         json.dumps(asdict(snap), ensure_ascii=False, indent=2),
         encoding="utf-8",
