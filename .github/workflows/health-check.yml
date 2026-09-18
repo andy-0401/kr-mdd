@@ -1,8 +1,23 @@
-# 라이브 페이지가 실제로 서빙하는 latest.json 의 날짜를 점검한다.
+# 라이브 페이지가 실제로 서빙하는 latest.json 을 점검한다.
 #   - 레포에 데이터가 커밋돼도 "배포"가 막히면 사용자는 옛 화면을 본다(2026-08 실제 사고).
 #     그래서 레포가 아니라 '사용자가 보는 라이브 URL'을 감시한다.
 #   - 오래됐으면 exit 1 → 워크플로 실패 → GitHub 이 저장소 소유자에게 실패 메일 발송(= 알림).
-#   - 두 레포에 동일 파일을 두어 서로 교차 감시(한쪽 Actions 가 죽어도 다른 쪽이 알림).
+#   - 세 레포에 동일 파일을 두어 서로 교차 감시(한쪽 Actions 가 죽어도 다른 쪽이 알림).
+#
+# 점검 항목 (2026-09-18 확장):
+#   ① 정지 감지  — 마지막 데이터가 4일 넘게 오래됨 → 실패
+#   ② 정시성 감지 — 세 페이지의 데이터 날짜가 서로 어긋남 → 실패
+#        15:40 정시 트리거(Netlify 예약함수 → repository_dispatch)가 특정 레포만 죽으면
+#        그 레포는 지연된 GitHub cron 으로 밤늦게 갱신된다. 날짜만 보면 '오늘 것'이라
+#        ①로는 절대 안 걸린다. 반면 셋을 서로 비교하면 늦은 놈이 바로 드러난다.
+#        휴장일에는 셋 다 똑같이 과거 날짜라 오탐이 없다(거래일 달력이 필요 없음).
+#   ③ 전체 누락 감지 — 오늘이 거래일인데 18시가 지나도 오늘 종가가 없음 → 실패
+#        ②는 '서로 비교'라 한 레포만 죽었을 때만 걸린다. PAT(kospi-cron) 만료처럼
+#        세 레포가 '동시에' 트리거를 잃으면 셋 다 똑같이 뒤처져 ②를 통과해 버린다.
+#        그래서 거래일 여부를 KRX 달력 대신 Yahoo 일봉(오늘 바 존재 여부)으로 독립 판정한다.
+#        (휴장일엔 오늘 바가 없으므로 오탐이 안 난다)
+#   ④ 종가 라벨 — 감시 시각엔 종가(close)가 떠 있어야 한다. 장중(intraday) 스냅샷이
+#        남아 있으면 지연된 장중 cron 이 종가를 덮어쓴 것 → 경고(실패는 아님).
 name: 데이터 갱신 감시(실패 시 알림)
 
 on:
@@ -23,7 +38,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: 라이브 데이터 신선도 점검
+      - name: 라이브 데이터 신선도·정시성 점검
         env:
           FORCE_FAIL: ${{ inputs.force_fail }}
         run: |
@@ -43,7 +58,8 @@ jobs:
               "우선주 괴리율": "https://andy-0401.github.io/kr-pref-spread/data/latest.json",
           }
 
-          problems = []
+          problems, warnings, seen = [], [], {}
+
           for name, url in TARGETS.items():
               try:
                   req = urllib.request.Request(
@@ -54,22 +70,70 @@ jobs:
                       data = json.load(r)
                   last = datetime.strptime(data["date"], "%Y-%m-%d").date()
                   age = (today - last).days
+                  seen[name] = {"date": last, "type": data.get("type", ""), "time": data.get("time", "")}
                   mark = "OK" if age <= MAX_AGE_DAYS else "STALE"
-                  print(f"[{mark}] {name}: {data['date']} ({age}일 전)")
+                  print(f"[{mark}] {name}: {data['date']} {data.get('time','')} ({age}일 전)")
                   if age > MAX_AGE_DAYS:
                       problems.append(f"{name} = {data['date']} ({age}일 전)")
               except Exception as e:  # 네트워크/파싱/404 등 전부 이상 신호
                   print(f"[ERROR] {name}: {e}")
                   problems.append(f"{name} 조회 실패({e})")
 
+          # ② 정시성 — 세 페이지의 날짜가 어긋나면 늦은 쪽의 정시 트리거가 죽은 것.
+          #    (휴장일엔 셋 다 같은 과거 날짜라 걸리지 않는다)
+          if len(seen) >= 2:
+              newest = max(v["date"] for v in seen.values())
+              laggards = [f"{n}({v['date']})" for n, v in seen.items() if v["date"] < newest]
+              if laggards:
+                  problems.append(
+                      "정시 갱신 누락 — 최신 " + str(newest) + " 인데 뒤처짐: " + ", ".join(laggards)
+                  )
+                  print(f"::error::[정시성] 다른 페이지는 {newest} 인데 뒤처진 페이지가 있습니다: {', '.join(laggards)}")
+                  print("  → 해당 레포의 15:40 트리거(Netlify 예약함수 → repository_dispatch)를 확인하세요.")
+                  print("  → 흔한 원인: PAT(kospi-cron) 만료 또는 그 레포가 토큰 Repository access 에서 빠짐(403).")
+
+          # ③ 전체 누락 — 오늘이 거래일인데 18시가 지나도 오늘 종가가 안 올라왔다면
+          #    세 레포가 동시에 트리거를 잃은 것(PAT 만료 등). ②로는 안 걸리는 구멍을 막는다.
+          now = datetime.now(KST)
+          if now.hour >= 17:
+              trading_today = None
+              try:
+                  u = ("https://query1.finance.yahoo.com/v8/finance/chart/005930.KS"
+                       "?range=5d&interval=1d")
+                  rq = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
+                  with urllib.request.urlopen(rq, timeout=20) as r:
+                      res = json.load(r)["chart"]["result"][0]
+                  bars = {datetime.fromtimestamp(t, KST).date() for t in res.get("timestamp", [])}
+                  trading_today = today in bars
+              except Exception as e:  # 소스 장애로 감시 자체가 죽지 않게 — 건너뛰고 알린다
+                  print(f"[SKIP] 거래일 판정 실패({e}) — 전체 누락 점검을 건너뜁니다")
+
+              if trading_today:
+                  missing = [f"{n}({v['date']})" for n, v in seen.items() if v["date"] != today]
+                  if missing:
+                      problems.append("오늘 종가 누락 — " + ", ".join(missing))
+                      print(f"::error::[전체누락] 오늘({today})은 거래일인데 종가가 안 올라온 페이지: "
+                            f"{', '.join(missing)}")
+                      print("  → 셋 다 걸렸다면 PAT(kospi-cron) 만료 가능성이 가장 큽니다.")
+              elif trading_today is False:
+                  print(f"[INFO] 오늘({today})은 휴장일 — 전체 누락 점검 생략")
+
+          # ④ 종가 라벨 — 감시 시각(10:00/18:00 KST)엔 close 가 떠 있어야 정상.
+          for n, v in seen.items():
+              if v["type"] and v["type"] != "close":
+                  warnings.append(f"{n} = {v['type']} {v['time']}")
+                  print(f"::warning::[라벨] {n} 가 종가(close)가 아니라 '{v['type']} {v['time']}' 상태입니다. "
+                        "지연된 장중 cron 이 종가 스냅샷을 덮어썼을 수 있습니다(값은 같아도 표기가 어긋남).")
+
           if problems:
-              msg = "데이터 갱신이 멈췄습니다 → " + " | ".join(problems)
+              msg = "데이터 갱신 이상 → " + " | ".join(problems)
               print(f"::error::{msg}")
               print("\n확인 순서: ①레포 docs/data/latest.json 날짜 ②갱신 워크플로 성공 여부 "
-                    "③GitHub Pages 배포(Settings→Pages, build_type) ④라이브 URL")
+                    "③GitHub Pages 배포(Settings→Pages, build_type) ④라이브 URL "
+                    "⑤Netlify 예약함수/PAT 권한")
               sys.exit(1)
 
-          print("\n모든 페이지 정상 — 갱신 지연 없음")
+          print("\n모든 페이지 정상 — 갱신 지연 없음" + (f" (경고 {len(warnings)}건)" if warnings else ""))
 
           if FORCE_FAIL:
               print("\n" + "=" * 60)
