@@ -115,6 +115,8 @@ jobs:
                       print(f"::error::[전체누락] 오늘({today})은 거래일인데 종가가 안 올라온 페이지: "
                             f"{', '.join(missing)}")
                       print("  → 셋 다 걸렸다면 PAT(kospi-cron) 만료 가능성이 가장 큽니다.")
+                  else:
+                      print(f"[OK] 오늘({today})은 거래일 — 세 페이지 모두 오늘 종가 반영됨")
               elif trading_today is False:
                   print(f"[INFO] 오늘({today})은 휴장일 — 전체 누락 점검 생략")
 
