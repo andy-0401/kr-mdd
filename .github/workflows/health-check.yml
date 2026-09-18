@@ -40,6 +40,7 @@ jobs:
           TARGETS = {
               "50일 이격도": "https://andy-0401.github.io/kospi-ma-disparity/data/latest.json",
               "MDD":        "https://andy-0401.github.io/kr-mdd/data/latest.json",
+              "우선주 괴리율": "https://andy-0401.github.io/kr-pref-spread/data/latest.json",
           }
 
           problems = []

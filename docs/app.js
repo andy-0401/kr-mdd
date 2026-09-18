@@ -116,16 +116,18 @@
   }
 
   function wireTabs() {
-    const url = CFG.disparityUrl || "";
-    if (url) {
-      const join = (u) => u + (u.includes("?") ? "&" : "?") + "utm_source=mdd&utm_medium=tab";
-      ["dispTab", "dispLink2"].forEach((id) => {
+    const join = (u) => u + (u.includes("?") ? "&" : "?") + "utm_source=mdd&utm_medium=tab";
+    const wire = (url, ids, ev) => {
+      if (!url) return;
+      ids.forEach((id) => {
         const el = $(id);
         if (!el) return;
         el.href = join(url);
-        el.addEventListener("click", () => track("disparity_click", { from: id }));
+        el.addEventListener("click", () => track(ev, { from: id }));
       });
-    }
+    };
+    wire(CFG.disparityUrl || "", ["dispTab", "dispLink2"], "disparity_click");
+    wire(CFG.prefUrl || "", ["prefTab", "prefLink2"], "pref_click");
   }
 
   function wireTelegram() {
